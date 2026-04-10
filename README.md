@@ -323,13 +323,13 @@ Or define your own:
 const config = {
   stages: ['Personal Info', 'Preferences', 'Feedback'],
   fields: [
-    { name: 'user_name',   label: 'Full Name',       type: 'text',     required: true,  stage: 'Personal Info', placeholder: 'e.g. John Doe' },
-    { name: 'user_email',  label: 'Email Address',   type: 'email',    required: true,  stage: 'Personal Info', placeholder: 'john@example.com' },
-    { name: 'user_gender', label: 'Gender',           type: 'radio',    required: false, stage: 'Personal Info', options: ['Male', 'Female', 'Non-binary', 'Prefer not to say'] },
-    { name: 'interests',   label: 'Areas of Interest',type: 'checkbox', required: true,  stage: 'Preferences',   options: ['Technology', 'Design', 'Marketing', 'Engineering'] },
-    { name: 'experience',  label: 'Experience Level', type: 'select',   required: true,  stage: 'Preferences',   options: ['Beginner', 'Intermediate', 'Advanced'] },
-    { name: 'satisfaction',label: 'Satisfaction',     type: 'radio',    required: true,  stage: 'Feedback',      options: ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied'] },
-    { name: 'comments',    label: 'Additional Comments', type: 'textarea', required: false, stage: 'Feedback',   placeholder: 'Type your feedback here...' },
+    { name: 'user_name',   label: 'Full Name',          type: 'text',     required: true,  stage: 'Personal Info', placeholder: 'e.g. John Doe' },
+    { name: 'user_email',  label: 'Email Address',      type: 'email',    required: true,  stage: 'Personal Info', placeholder: 'john@example.com' },
+    { name: 'user_gender', label: 'Gender',              type: 'radio',    required: false, stage: 'Personal Info', options: ['Male', 'Female', 'Non-binary', 'Prefer not to say'] },
+    { name: 'interests',   label: 'Areas of Interest',  type: 'checkbox', required: true,  stage: 'Preferences',   options: ['Technology', 'Design', 'Marketing', 'Engineering'] },
+    { name: 'experience',  label: 'Experience Level',   type: 'select',   required: true,  stage: 'Preferences',   options: ['Beginner', 'Intermediate', 'Advanced'] },
+    { name: 'satisfaction',label: 'Satisfaction',       type: 'radio',    required: true,  stage: 'Feedback',      options: ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied'] },
+    { name: 'comments',    label: 'Additional Comments',type: 'textarea', required: false, stage: 'Feedback',      placeholder: 'Type your feedback here...' },
   ],
 };
 ```
@@ -378,8 +378,8 @@ const handleSubmit = (data: FormData) => {
 ## Links
 
 - **npm:** https://www.npmjs.com/package/dynamic-react-questionnare-component
-- **GitHub:** https://github.com/questera/dynamic-react-questionnare-component
-- **Issues:** https://github.com/questera/dynamic-react-questionnare-component/issues
+- **GitHub:** https://github.com/Ashish-cse38/Dynamic-React-Questionnaire-Component-Design-4586
+- **Issues:** https://github.com/Ashish-cse38/Dynamic-React-Questionnaire-Component-Design-4586/issues
 
 ---
 
