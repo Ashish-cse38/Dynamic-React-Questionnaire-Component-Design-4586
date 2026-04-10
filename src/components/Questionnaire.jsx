@@ -7,13 +7,19 @@ import * as FiIcons from 'react-icons/fi';
 
 const { FiArrowRight, FiArrowLeft, FiCheck, FiRefreshCw } = FiIcons;
 
-/**
- * Multi-step questionnaire driven entirely by a JSON config object.
- *
- * @param {import('../types').QuestionnaireProps} props
- */
+const resolveToken = (template, stageName) =>
+  template?.replace('{stage}', stageName) ?? stageName;
+
 const Questionnaire = ({ config, onSubmit }) => {
-  const { stages, fields } = config;
+  const {
+    stages,
+    fields,
+    mainHeading = 'Qestionnaire',
+    subHeading = 'Fill out the information below to proceed.',
+    stageHeading,
+    stageDescription,
+  } = config;
+
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
@@ -23,6 +29,14 @@ const Questionnaire = ({ config, onSubmit }) => {
   const currentStageName = stages[currentStageIndex];
   const currentFields = fields.filter((f) => f.stage === currentStageName);
   const isLastStage = currentStageIndex === stages.length - 1;
+
+  const resolvedStageHeading = stageHeading
+    ? resolveToken(stageHeading, currentStageName)
+    : currentStageName;
+
+  const resolvedStageDescription = stageDescription
+    ? resolveToken(stageDescription, currentStageName)
+    : null;
 
   const handleChange = (name, value) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -45,9 +59,7 @@ const Questionnaire = ({ config, onSubmit }) => {
           val === null ||
           val === '' ||
           (Array.isArray(val) && val.length === 0);
-        if (isEmpty) {
-          newErrors[field.name] = 'This field is required';
-        }
+        if (isEmpty) newErrors[field.name] = 'This field is required';
       }
     });
     setErrors(newErrors);
@@ -107,8 +119,7 @@ const Questionnaire = ({ config, onSubmit }) => {
           onClick={handleReset}
           className="inline-flex items-center gap-2 px-7 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md shadow-indigo-200"
         >
-          <SafeIcon icon={FiRefreshCw} />
-          Start Over
+          <SafeIcon icon={FiRefreshCw} /> Start Over
         </button>
       </motion.div>
     );
@@ -123,7 +134,7 @@ const Questionnaire = ({ config, onSubmit }) => {
       {/* Header */}
       <div className="px-8 pt-8 pb-4 bg-gradient-to-br from-indigo-50 to-white border-b border-gray-100">
         <div className="flex items-center justify-between mb-1">
-          <h1 className="text-2xl font-bold text-gray-800">Questionnaire</h1>
+          <h1 className="text-2xl font-bold text-gray-800">{mainHeading}</h1>
           <span
             className="text-xs font-semibold text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100"
             aria-live="polite"
@@ -131,7 +142,7 @@ const Questionnaire = ({ config, onSubmit }) => {
             Step {currentStageIndex + 1} of {stages.length}
           </span>
         </div>
-        <p className="text-sm text-gray-400 mb-6">Fill out the information below to proceed.</p>
+        <p className="text-sm text-gray-400 mb-6">{subHeading}</p>
         <ProgressBar stages={stages} currentStageIndex={currentStageIndex} />
       </div>
 
@@ -146,12 +157,21 @@ const Questionnaire = ({ config, onSubmit }) => {
             exit={{ opacity: 0, x: direction * -30 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
           >
-            <h2 className="text-base font-bold text-indigo-700 uppercase tracking-widest mb-6 flex items-center gap-2">
+            <h2 className="text-base font-bold text-indigo-700 uppercase tracking-widest mb-1 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center font-bold">
                 {currentStageIndex + 1}
               </span>
-              {currentStageName}
+              {resolvedStageHeading}
             </h2>
+
+            {resolvedStageDescription && (
+              <p className="text-sm text-gray-400 mb-6 ml-8">
+                {resolvedStageDescription}
+              </p>
+            )}
+
+            {!resolvedStageDescription && <div className="mb-6" />}
+
             {currentFields.map((field) => (
               <FieldRenderer
                 key={field.name}
@@ -178,24 +198,18 @@ const Questionnaire = ({ config, onSubmit }) => {
               : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 hover:border-gray-300',
           ].join(' ')}
         >
-          <SafeIcon icon={FiArrowLeft} />
-          Previous
+          <SafeIcon icon={FiArrowLeft} /> Previous
         </button>
+
         <button
           onClick={handleNext}
           aria-label={isLastStage ? 'Submit form' : 'Go to next step'}
           className="flex items-center gap-2 px-7 py-2.5 rounded-xl font-semibold text-sm bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md shadow-indigo-200"
         >
           {isLastStage ? (
-            <>
-              <SafeIcon icon={FiCheck} />
-              Submit
-            </>
+            <><SafeIcon icon={FiCheck} /> Submit</>
           ) : (
-            <>
-              Next Step
-              <SafeIcon icon={FiArrowRight} />
-            </>
+            <> Next Step <SafeIcon icon={FiArrowRight} /></>
           )}
         </button>
       </div>

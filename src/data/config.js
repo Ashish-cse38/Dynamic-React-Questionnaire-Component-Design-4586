@@ -1,4 +1,8 @@
 export const formConfig = {
+  mainHeading: 'User Questionnaire',
+  subHeading: 'Help us get to know you better by completing all sections below.',
+  stageHeading: 'Section: {stage}',
+  stageDescription: 'Please complete all fields for the {stage} section.',
   stages: ['Personal Info', 'Preferences', 'Feedback'],
   fields: [
     {
@@ -7,7 +11,7 @@ export const formConfig = {
       type: 'text',
       required: true,
       stage: 'Personal Info',
-      placeholder: 'e.g. John Doe'
+      placeholder: 'e.g. John Doe',
     },
     {
       name: 'user_email',
@@ -15,7 +19,7 @@ export const formConfig = {
       type: 'text',
       required: true,
       stage: 'Personal Info',
-      placeholder: 'john@example.com'
+      placeholder: 'john@example.com',
     },
     {
       name: 'user_gender',
@@ -23,7 +27,7 @@ export const formConfig = {
       type: 'radio',
       required: false,
       stage: 'Personal Info',
-      options: ['Male', 'Female', 'Non-binary', 'Prefer not to say']
+      options: ['Male', 'Female', 'Non-binary', 'Prefer not to say'],
     },
     {
       name: 'interests',
@@ -31,7 +35,7 @@ export const formConfig = {
       type: 'checkbox',
       required: true,
       stage: 'Preferences',
-      options: ['Technology', 'Design', 'Marketing', 'Sales', 'Engineering']
+      options: ['Technology', 'Design', 'Marketing', 'Sales', 'Engineering'],
     },
     {
       name: 'experience_level',
@@ -39,7 +43,7 @@ export const formConfig = {
       type: 'select',
       required: true,
       stage: 'Preferences',
-      options: ['Beginner (0-2 years)', 'Intermediate (3-5 years)', 'Advanced (5+ years)']
+      options: ['Beginner (0-2 years)', 'Intermediate (3-5 years)', 'Advanced (5+ years)'],
     },
     {
       name: 'satisfaction',
@@ -47,7 +51,7 @@ export const formConfig = {
       type: 'radio',
       required: true,
       stage: 'Feedback',
-      options: ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied']
+      options: ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied'],
     },
     {
       name: 'additional_comments',
@@ -55,7 +59,7 @@ export const formConfig = {
       type: 'textarea',
       required: false,
       stage: 'Feedback',
-      placeholder: 'Type your feedback here...'
-    }
-  ]
+      placeholder: 'Type your feedback here...',
+    },
+  ],
 };
