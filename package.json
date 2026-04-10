@@ -21,11 +21,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/dynamic-react-questionnare-component.git"
+    "url": "https://github.com/questera/dynamic-react-questionnare-component.git"
   },
-  "homepage": "https://github.com/your-org/dynamic-react-questionnare-component#readme",
+  "homepage": "https://github.com/questera/dynamic-react-questionnare-component#readme",
   "bugs": {
-    "url": "https://github.com/your-org/dynamic-react-questionnare-component/issues"
+    "url": "https://github.com/questera/dynamic-react-questionnare-component/issues"
   },
   "type": "module",
   "main": "dist/index.js",
