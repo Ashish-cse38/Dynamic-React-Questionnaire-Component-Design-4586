@@ -5,14 +5,17 @@ import * as FiIcons from 'react-icons/fi';
 
 const { FiAlertCircle } = FiIcons;
 
+/**
+ * @param {{ field: import('../types').FieldConfig, value: string | string[], onChange: (name: string, value: string | string[]) => void, error?: string }} props
+ */
 const FieldRenderer = ({ field, value, onChange, error }) => {
   const { name, label, type, required, options, placeholder } = field;
 
-  const baseInputClass = `w-full p-3 border rounded-xl outline-none transition-all duration-200 bg-white text-gray-800
-    ${error
+  const baseInputClass = `w-full p-3 border rounded-xl outline-none transition-all duration-200 bg-white text-gray-800 ${
+    error
       ? 'border-red-400 focus:ring-2 focus:ring-red-100'
       : 'border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100'
-    }`;
+  }`;
 
   const renderInput = () => {
     switch (type) {
@@ -124,7 +127,9 @@ const FieldRenderer = ({ field, value, onChange, error }) => {
 
       default:
         return (
-          <p className="text-red-500 text-sm">Unsupported field type: <code>{type}</code></p>
+          <p className="text-red-500 text-sm">
+            Unsupported field type: <code>{type}</code>
+          </p>
         );
     }
   };
@@ -140,9 +145,7 @@ const FieldRenderer = ({ field, value, onChange, error }) => {
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
-
       {renderInput()}
-
       {error && (
         <motion.div
           initial={{ opacity: 0, y: -4 }}

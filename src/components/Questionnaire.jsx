@@ -7,6 +7,9 @@ import * as FiIcons from 'react-icons/fi';
 
 const { FiArrowRight, FiArrowLeft, FiCheck, FiRefreshCw } = FiIcons;
 
+/**
+ * @param {{ config: import('../types').QuestionnaireConfig, onSubmit?: (formData: import('../types').FormData) => void }} props
+ */
 const Questionnaire = ({ config, onSubmit }) => {
   const { stages, fields } = config;
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
@@ -104,6 +107,7 @@ const Questionnaire = ({ config, onSubmit }) => {
 
   return (
     <div className="max-w-3xl mx-auto w-full bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col">
+      {/* Header */}
       <div className="px-8 pt-8 pb-4 bg-gradient-to-br from-indigo-50 to-white border-b border-gray-100">
         <div className="flex items-center justify-between mb-1">
           <h1 className="text-2xl font-bold text-gray-800">Questionnaire</h1>
@@ -115,6 +119,7 @@ const Questionnaire = ({ config, onSubmit }) => {
         <ProgressBar stages={stages} currentStageIndex={currentStageIndex} />
       </div>
 
+      {/* Fields */}
       <div className="flex-1 px-8 py-8 overflow-hidden min-h-[380px]">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
@@ -144,6 +149,7 @@ const Questionnaire = ({ config, onSubmit }) => {
         </AnimatePresence>
       </div>
 
+      {/* Footer Nav */}
       <div className="px-8 py-5 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
         <button
           onClick={handlePrev}
