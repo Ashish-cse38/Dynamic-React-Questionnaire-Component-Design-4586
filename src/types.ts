@@ -16,25 +16,42 @@ export type FieldType =
 // Field Config
 // ---------------------------------------------------------------------------
 
-/** Definition of a single form field. */
+/** Definition of a single form field within a questionnaire stage. */
 export interface FieldConfig {
-  /** Unique identifier — used as the key in FormData. */
+  /** Unique identifier — used as the key in {@link FormData}. */
   name: string;
-  /** Display label rendered above the input. */
+
+  /** Human-readable label rendered above the input element. */
   label: string;
-  /** Input type — controls which HTML element is rendered. */
-  type: FieldType;
+
   /**
-   * Must exactly match one of the stage names in QuestionnaireConfig.stages.
-   * Determines which step the field appears on.
+   * Controls which HTML element is rendered.
+   * Must be one of the values in {@link FieldType}.
+   */
+  type: FieldType;
+
+  /**
+   * The stage this field belongs to.
+   * Must exactly match one of the strings in {@link QuestionnaireConfig.stages}.
    */
   stage: string;
-  /** If true, the field must be non-empty before the user can advance. */
-  required?: boolean;
-  /** Placeholder text — applies to text, email, number, and textarea types. */
-  placeholder?: string;
+
   /**
-   * Option list — required for radio, checkbox, and select types.
+   * When `true`, the field must have a non-empty value before
+   * the user can advance to the next stage.
+   * @default false
+   */
+  required?: boolean;
+
+  /**
+   * Placeholder text shown inside the input.
+   * Only applied to `text`, `email`, `number`, and `textarea` types.
+   */
+  placeholder?: string;
+
+  /**
+   * Selectable options list.
+   * **Required** for `radio`, `checkbox`, and `select` types.
    * Ignored for all other types.
    */
   options?: string[];
@@ -44,12 +61,19 @@ export interface FieldConfig {
 // Questionnaire Config
 // ---------------------------------------------------------------------------
 
-/** Top-level configuration object passed to <Questionnaire />. */
+/**
+ * Top-level configuration object consumed by {@link QuestionnaireProps}.
+ * Fully describes the form structure without any JSX.
+ */
 export interface QuestionnaireConfig {
-  /** Ordered list of stage names. Each name becomes one step in the progress bar. */
-  stages: string[];
   /**
-   * All field definitions across all stages.
+   * Ordered list of stage names.
+   * Each entry creates one step in the progress bar.
+   */
+  stages: string[];
+
+  /**
+   * All field definitions across every stage.
    * Each field's `stage` property must match a value in `stages`.
    */
   fields: FieldConfig[];
@@ -60,9 +84,10 @@ export interface QuestionnaireConfig {
 // ---------------------------------------------------------------------------
 
 /**
- * The collected form values passed to onSubmit.
- * - Text-like fields → string
- * - Checkbox fields  → string[]
+ * Collected form values passed to {@link QuestionnaireProps.onSubmit}.
+ *
+ * - **Text-like fields** (`text`, `email`, `number`, `textarea`, `select`, `radio`) → `string`
+ * - **Checkbox fields** → `string[]`
  */
 export type FormData = Record<string, string | string[]>;
 
@@ -70,43 +95,54 @@ export type FormData = Record<string, string | string[]>;
 // Component Props
 // ---------------------------------------------------------------------------
 
-/** Props for the top-level <Questionnaire /> component. */
+/** Props accepted by the top-level `<Questionnaire />` component. */
 export interface QuestionnaireProps {
-  /** The form configuration object. */
+  /** The complete form configuration object. */
   config: QuestionnaireConfig;
+
   /**
-   * Callback fired with the collected FormData on final-stage submission.
-   * Defaults to console.log if omitted.
+   * Called with the collected {@link FormData} when the user submits the final stage.
+   * Falls back to `console.log` when omitted.
    */
   onSubmit?: (formData: FormData) => void;
 }
 
-/** Props for the <FieldRenderer /> component. */
+/** Props accepted by the `<FieldRenderer />` component. */
 export interface FieldRendererProps {
-  /** A single field config object. */
+  /** The field definition to render. */
   field: FieldConfig;
-  /** Current controlled value for this field. */
-  value: string | string[];
+
   /**
-   * Change handler — called with (fieldName, newValue) on every change.
-   * newValue is string[] only for checkbox fields.
+   * Current controlled value for this field.
+   * `string[]` only for `checkbox` fields; `string` for everything else.
+   */
+  value: string | string[];
+
+  /**
+   * Fired on every change with `(fieldName, newValue)`.
+   * `newValue` is `string[]` only for `checkbox` fields.
    */
   onChange: (name: string, value: string | string[]) => void;
-  /** Validation error message displayed below the field. */
+
+  /** Validation error message rendered below the input when present. */
   error?: string;
 }
 
-/** Props for the <ProgressBar /> component. */
+/** Props accepted by the `<ProgressBar />` component. */
 export interface ProgressBarProps {
-  /** Ordered array of stage names. */
+  /** Ordered array of stage name strings. */
   stages: string[];
+
   /** Zero-based index of the currently active stage. */
   currentStageIndex: number;
 }
 
 // ---------------------------------------------------------------------------
-// Internal helpers (not exported from index)
+// Internal helpers (not re-exported from src/index.ts)
 // ---------------------------------------------------------------------------
 
-/** Internal validation errors map — keyed by field name. */
+/**
+ * Map of field names to their validation error messages.
+ * Used internally by `<Questionnaire />` — not part of the public API.
+ */
 export type ValidationErrors = Record<string, string>;

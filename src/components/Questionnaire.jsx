@@ -8,7 +8,9 @@ import * as FiIcons from 'react-icons/fi';
 const { FiArrowRight, FiArrowLeft, FiCheck, FiRefreshCw } = FiIcons;
 
 /**
- * @param {{ config: import('../types').QuestionnaireConfig, onSubmit?: (formData: import('../types').FormData) => void }} props
+ * Multi-step questionnaire driven entirely by a JSON config object.
+ *
+ * @param {import('../types').QuestionnaireProps} props
  */
 const Questionnaire = ({ config, onSubmit }) => {
   const { stages, fields } = config;
@@ -38,7 +40,12 @@ const Questionnaire = ({ config, onSubmit }) => {
     currentFields.forEach((field) => {
       if (field.required) {
         const val = formData[field.name];
-        if (!val || val === '' || (Array.isArray(val) && val.length === 0)) {
+        const isEmpty =
+          val === undefined ||
+          val === null ||
+          val === '' ||
+          (Array.isArray(val) && val.length === 0);
+        if (isEmpty) {
           newErrors[field.name] = 'This field is required';
         }
       }
@@ -80,6 +87,8 @@ const Questionnaire = ({ config, onSubmit }) => {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4 }}
         className="max-w-2xl mx-auto bg-white rounded-3xl shadow-xl p-14 text-center"
+        role="status"
+        aria-live="polite"
       >
         <motion.div
           initial={{ scale: 0 }}
@@ -106,12 +115,19 @@ const Questionnaire = ({ config, onSubmit }) => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto w-full bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col">
+    <div
+      className="max-w-3xl mx-auto w-full bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col"
+      role="main"
+      aria-label="Multi-step questionnaire"
+    >
       {/* Header */}
       <div className="px-8 pt-8 pb-4 bg-gradient-to-br from-indigo-50 to-white border-b border-gray-100">
         <div className="flex items-center justify-between mb-1">
           <h1 className="text-2xl font-bold text-gray-800">Questionnaire</h1>
-          <span className="text-xs font-semibold text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+          <span
+            className="text-xs font-semibold text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100"
+            aria-live="polite"
+          >
             Step {currentStageIndex + 1} of {stages.length}
           </span>
         </div>
@@ -140,7 +156,7 @@ const Questionnaire = ({ config, onSubmit }) => {
               <FieldRenderer
                 key={field.name}
                 field={field}
-                value={formData[field.name]}
+                value={formData[field.name] ?? ''}
                 onChange={handleChange}
                 error={errors[field.name]}
               />
@@ -149,21 +165,25 @@ const Questionnaire = ({ config, onSubmit }) => {
         </AnimatePresence>
       </div>
 
-      {/* Footer Nav */}
+      {/* Footer nav */}
       <div className="px-8 py-5 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
         <button
           onClick={handlePrev}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 ${
+          disabled={currentStageIndex === 0}
+          aria-label="Go to previous step"
+          className={[
+            'flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200',
             currentStageIndex === 0
               ? 'opacity-0 pointer-events-none'
-              : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 hover:border-gray-300'
-          }`}
+              : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 hover:border-gray-300',
+          ].join(' ')}
         >
           <SafeIcon icon={FiArrowLeft} />
           Previous
         </button>
         <button
           onClick={handleNext}
+          aria-label={isLastStage ? 'Submit form' : 'Go to next step'}
           className="flex items-center gap-2 px-7 py-2.5 rounded-xl font-semibold text-sm bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md shadow-indigo-200"
         >
           {isLastStage ? (
