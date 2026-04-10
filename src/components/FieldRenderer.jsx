@@ -6,16 +6,19 @@ import * as FiIcons from 'react-icons/fi';
 const { FiAlertCircle } = FiIcons;
 
 /**
- * @param {{ field: import('../types').FieldConfig, value: string | string[], onChange: (name: string, value: string | string[]) => void, error?: string }} props
+ * Renders a single form field with its label, input element, and error message.
+ *
+ * @param {import('../types').FieldRendererProps} props
  */
 const FieldRenderer = ({ field, value, onChange, error }) => {
   const { name, label, type, required, options, placeholder } = field;
 
-  const baseInputClass = `w-full p-3 border rounded-xl outline-none transition-all duration-200 bg-white text-gray-800 ${
+  const baseInputClass = [
+    'w-full p-3 border rounded-xl outline-none transition-all duration-200 bg-white text-gray-800',
     error
       ? 'border-red-400 focus:ring-2 focus:ring-red-100'
-      : 'border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100'
-  }`;
+      : 'border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100',
+  ].join(' ');
 
   const renderInput = () => {
     switch (type) {
@@ -26,7 +29,7 @@ const FieldRenderer = ({ field, value, onChange, error }) => {
           <input
             type={type}
             id={name}
-            value={value || ''}
+            value={typeof value === 'string' ? value : ''}
             onChange={(e) => onChange(name, e.target.value)}
             className={baseInputClass}
             placeholder={placeholder}
@@ -37,7 +40,7 @@ const FieldRenderer = ({ field, value, onChange, error }) => {
         return (
           <textarea
             id={name}
-            value={value || ''}
+            value={typeof value === 'string' ? value : ''}
             onChange={(e) => onChange(name, e.target.value)}
             className={`${baseInputClass} min-h-[120px] resize-y`}
             placeholder={placeholder}
@@ -49,7 +52,7 @@ const FieldRenderer = ({ field, value, onChange, error }) => {
           <div className="relative">
             <select
               id={name}
-              value={value || ''}
+              value={typeof value === 'string' ? value : ''}
               onChange={(e) => onChange(name, e.target.value)}
               className={`${baseInputClass} appearance-none cursor-pointer pr-10`}
             >
@@ -72,11 +75,12 @@ const FieldRenderer = ({ field, value, onChange, error }) => {
             {options?.map((opt, idx) => (
               <label
                 key={idx}
-                className={`flex items-center p-3.5 border rounded-xl cursor-pointer transition-all duration-150 ${
+                className={[
+                  'flex items-center p-3.5 border rounded-xl cursor-pointer transition-all duration-150',
                   value === opt
                     ? 'border-indigo-500 bg-indigo-50 text-indigo-800'
-                    : 'border-gray-200 hover:bg-gray-50 text-gray-700'
-                }`}
+                    : 'border-gray-200 hover:bg-gray-50 text-gray-700',
+                ].join(' ')}
               >
                 <input
                   type="radio"
@@ -95,21 +99,22 @@ const FieldRenderer = ({ field, value, onChange, error }) => {
       case 'checkbox': {
         const currentValues = Array.isArray(value) ? value : [];
         const handleCheckboxChange = (opt) => {
-          const newValues = currentValues.includes(opt)
+          const next = currentValues.includes(opt)
             ? currentValues.filter((v) => v !== opt)
             : [...currentValues, opt];
-          onChange(name, newValues);
+          onChange(name, next);
         };
         return (
           <div className="space-y-2 mt-1">
             {options?.map((opt, idx) => (
               <label
                 key={idx}
-                className={`flex items-center p-3.5 border rounded-xl cursor-pointer transition-all duration-150 ${
+                className={[
+                  'flex items-center p-3.5 border rounded-xl cursor-pointer transition-all duration-150',
                   currentValues.includes(opt)
                     ? 'border-indigo-500 bg-indigo-50 text-indigo-800'
-                    : 'border-gray-200 hover:bg-gray-50 text-gray-700'
-                }`}
+                    : 'border-gray-200 hover:bg-gray-50 text-gray-700',
+                ].join(' ')}
               >
                 <input
                   type="checkbox"
@@ -143,11 +148,12 @@ const FieldRenderer = ({ field, value, onChange, error }) => {
     >
       <label htmlFor={name} className="block text-sm font-semibold text-gray-700 mb-1.5">
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="text-red-500 ml-1" aria-hidden="true">*</span>}
       </label>
       {renderInput()}
       {error && (
         <motion.div
+          role="alert"
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center mt-1.5 text-xs text-red-500 gap-1"
