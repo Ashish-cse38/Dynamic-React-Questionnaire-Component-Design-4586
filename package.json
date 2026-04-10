@@ -6,6 +6,17 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsup src/index.ts --format cjs,esm --dts",
@@ -15,16 +26,8 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@questlabs/react-sdk": "^2.2.92",
-    "@supabase/supabase-js": "^2.39.0",
-    "react": "^18.3.1",
-    "react-router-dom": "^7.1.0",
-    "react-dom": "^18.3.1",
     "framer-motion": "^11.0.8",
-    "react-icons": "^5.4.0",
-    "echarts": "^5.5.0",
-    "echarts-for-react": "^3.0.2",
-    "date-fns": "4.1.0"
+    "react-icons": "^5.4.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
@@ -37,6 +40,8 @@
     "globals": "^15.9.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "tailwindcss": "^3.4.17",
     "tsup": "^8.0.0",
     "typescript": "^5.5.3",

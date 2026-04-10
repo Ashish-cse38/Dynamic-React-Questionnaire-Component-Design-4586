@@ -1,0 +1,40 @@
+# Development and build configurations
+vite.config.js
+postcss.config.js
+tailwind.config.js
+tsconfig.json
+eslint.config.js
+index.html
+.gitignore
+.npmignore
+*.local
+
+# Example application files
+src/main.jsx
+src/App.jsx
+src/App.css
+src/index.css
+
+# Logs and temporary files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+
+# Keep these in the published package:
+# - dist/         (build output)
+# - src/components/
+# - src/common/
+# - src/data/
+# - src/index.ts
+# - package.json
+# - README.md (if present)
