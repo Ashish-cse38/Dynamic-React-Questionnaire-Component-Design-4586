@@ -5,6 +5,9 @@ import * as FiIcons from 'react-icons/fi';
 
 const { FiCheck } = FiIcons;
 
+/**
+ * @param {{ stages: string[], currentStageIndex: number }} props
+ */
 const ProgressBar = ({ stages, currentStageIndex }) => {
   const progressPercentage =
     stages.length > 1 ? (currentStageIndex / (stages.length - 1)) * 100 : 100;
@@ -19,9 +22,7 @@ const ProgressBar = ({ stages, currentStageIndex }) => {
         className="absolute left-5 top-9 h-1.5 bg-indigo-600 rounded-full z-0"
         style={{ right: 'auto' }}
         initial={{ width: '0%' }}
-        animate={{
-          width: `calc(${progressPercentage}% * (100% - 40px) / 100%)`
-        }}
+        animate={{ width: `calc(${progressPercentage}% * (100% - 40px) / 100%)` }}
         transition={{ duration: 0.5, ease: 'easeInOut' }}
       />
 
@@ -30,7 +31,6 @@ const ProgressBar = ({ stages, currentStageIndex }) => {
         {stages.map((stage, index) => {
           const isCompleted = index < currentStageIndex;
           const isCurrent = index === currentStageIndex;
-
           return (
             <div key={index} className="flex flex-col items-center w-full">
               <motion.div
@@ -50,7 +50,6 @@ const ProgressBar = ({ stages, currentStageIndex }) => {
                   <span className="font-bold text-sm">{index + 1}</span>
                 )}
               </motion.div>
-
               <span
                 className={`mt-2 text-xs font-semibold text-center leading-tight transition-colors duration-300 ${
                   isCurrent
