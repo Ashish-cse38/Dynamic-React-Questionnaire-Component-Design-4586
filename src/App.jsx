@@ -3,6 +3,11 @@ import Questionnaire from './components/Questionnaire';
 import { formConfig } from './data/config';
 
 function App() {
+  const handleSubmit = (formData) => {
+    console.log('Form submitted with data:', formData);
+    // Handle your submission logic here (e.g., API call)
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-indigo-50 to-slate-100 py-14 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="w-full max-w-4xl">
@@ -17,8 +22,7 @@ function App() {
             A dynamic, JSON-driven multi-step form with stage-based progression, validation, and smooth animations.
           </p>
         </div>
-
-        <Questionnaire config={formConfig} />
+        <Questionnaire config={formConfig} onSubmit={handleSubmit} />
       </div>
     </div>
   );

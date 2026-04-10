@@ -7,7 +7,7 @@ import * as FiIcons from 'react-icons/fi';
 
 const { FiArrowRight, FiArrowLeft, FiCheck, FiRefreshCw } = FiIcons;
 
-const Questionnaire = ({ config }) => {
+const Questionnaire = ({ config, onSubmit }) => {
   const { stages, fields } = config;
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [formData, setFormData] = useState({});
@@ -47,7 +47,11 @@ const Questionnaire = ({ config }) => {
   const handleNext = () => {
     if (!validateStage()) return;
     if (isLastStage) {
-      console.log('Submitted:', formData);
+      if (onSubmit) {
+        onSubmit(formData);
+      } else {
+        console.log('Submitted:', formData);
+      }
       setIsSubmitted(true);
     } else {
       setDirection(1);
@@ -87,7 +91,8 @@ const Questionnaire = ({ config }) => {
         </motion.div>
         <h2 className="text-3xl font-bold text-gray-800 mb-3">All Done!</h2>
         <p className="text-gray-500 mb-8 leading-relaxed">
-          Your responses have been recorded successfully.<br />Thank you for taking the time to fill this out.
+          Your responses have been recorded successfully.<br />
+          Thank you for taking the time to fill this out.
         </p>
         <button
           onClick={handleReset}
@@ -131,7 +136,6 @@ const Questionnaire = ({ config }) => {
               </span>
               {currentStageName}
             </h2>
-
             {currentFields.map((field) => (
               <FieldRenderer
                 key={field.name}
@@ -158,7 +162,6 @@ const Questionnaire = ({ config }) => {
           <SafeIcon icon={FiArrowLeft} />
           Previous
         </button>
-
         <button
           onClick={handleNext}
           className="flex items-center gap-2 px-7 py-2.5 rounded-xl font-semibold text-sm bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md shadow-indigo-200"
