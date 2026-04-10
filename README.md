@@ -1,4 +1,4 @@
-# questionnaire-react
+# dynamic-react-questionnare-component
 
 [![npm version](https://img.shields.io/npm/v/dynamic-react-questionnare-component.svg)](https://www.npmjs.com/package/dynamic-react-questionnare-component)
 [![license](https://img.shields.io/npm/l/dynamic-react-questionnare-component.svg)](./LICENSE)
@@ -72,7 +72,9 @@ export default App;
 |---|---|---|
 | `Questionnaire` | Component | Main multi-step form component |
 | `FieldRenderer` | Component | Renders a single field — useful for custom layouts |
-| `ProgressBar` | Component | Stage progress indicator |
+| `ProgressBar` | Component | Backwards-compatible alias for `NumberedProgressBar1` |
+| `NumberedProgressBar1` | Component | Numbered progress bar with fill track |
+| `NamedProgressBar1` | Component | Stage-name progress bar (no numbers) with `>` separators |
 | `formConfig` | Object | Built-in sample config as a starting template |
 
 **TypeScript types also exported:**
@@ -92,6 +94,8 @@ import {
   Questionnaire,
   FieldRenderer,
   ProgressBar,
+  NumberedProgressBar1,
+  NamedProgressBar1,
   formConfig,
 } from 'dynamic-react-questionnare-component';
 
@@ -136,6 +140,49 @@ The primary component. Handles stage navigation, per-stage validation, and submi
 interface QuestionnaireConfig {
   stages: string[];      // Ordered list of stage names
   fields: FieldConfig[]; // All field definitions across all stages
+
+  // Optional headings
+  topHeading?: string;     // Outside the card (page-level)
+  topSubHeading?: string;  // Outside the card (page-level)
+  mainHeading?: string;    // Inside the card header
+  subHeading?: string;     // Inside the card header
+
+  // Optional stage header copy (supports {stage} token)
+  stageHeading?: string;
+  stageDescription?: string;
+
+  // Progress bar UI
+  progressBarVariant?: 'numberedprogressbar1' | 'namedprogressbar1';
+
+  // Optional colors (CSS color strings)
+  colors?: {
+    background?: string;   // Outermost page background
+    cardHeader?: string;   // Header background (color or gradient string)
+    cardMain?: string;     // Main area background
+    cardFooter?: string;   // Footer background
+    headings?: {
+      topHeading?: string;
+      mainHeading?: string;
+      stageHeading?: string;
+    };
+    subHeadings?: {
+      topSubHeading?: string;
+      subHeading?: string;
+      stageDescription?: string;
+    };
+    text?: {
+      default?: string;
+      muted?: string;
+    };
+  };
+
+  // Optional layout sizing (percent-based)
+  area?: {
+    cardWidthPercent?: number;   // 0–100 (% of container width)
+    cardHeightPercent?: number;  // 0–100 (% of viewport height, via vh)
+    headerPercent?: number;      // 0–100 (% of card height)
+    footerPercent?: number;      // 0–100 (% of card height)
+  };
 }
 ```
 
@@ -265,6 +312,8 @@ type FormData = Record<string, string | string[]>
 
 ### `<ProgressBar />`
 
+`ProgressBar` is a backwards-compatible alias for the numbered progress bar (`NumberedProgressBar1`).
+
 ```tsx
 import { ProgressBar } from 'dynamic-react-questionnare-component';
 
@@ -278,6 +327,53 @@ import { ProgressBar } from 'dynamic-react-questionnare-component';
 |---|---|---|---|
 | `stages` | `string[]` | ✅ | Ordered array of stage names |
 | `currentStageIndex` | `number` | ✅ | Zero-based index of the active stage |
+
+### Progress bar variants (via config)
+
+Use the variant switch on `<Questionnaire />`:
+
+```js
+const config = {
+  // ...
+  progressBarVariant: 'namedprogressbar1', // or 'numberedprogressbar1'
+};
+```
+
+### Styling (colors)
+
+All values are regular CSS colors (hex/rgb/hsl/named colors). Example:
+
+```js
+const config = {
+  // ...
+  colors: {
+    background: '#F1F5F9',
+    cardHeader: 'linear-gradient(135deg, #EEF2FF 0%, #FFFFFF 100%)',
+    cardMain: '#FFFFFF',
+    cardFooter: '#F8FAFC',
+    headings: { stageHeading: '#4338CA' },
+    text: { default: '#0F172A', muted: '#64748B' },
+  },
+};
+```
+
+### Layout (area)
+
+You can optionally constrain the card size using percentages:
+
+```js
+const config = {
+  // ...
+  area: {
+    cardWidthPercent: 100,
+    cardHeightPercent: 86,
+    headerPercent: 24,
+    footerPercent: 10,
+  },
+};
+```
+
+If `cardHeightPercent` is set, the **main area becomes scrollable** automatically when content overflows (so the page itself doesn’t scroll).
 
 ---
 
@@ -377,9 +473,9 @@ const handleSubmit = (data: FormData) => {
 
 ## Links
 
-- **npm:** https://www.npmjs.com/package/dynamic-react-questionnare-component
-- **GitHub:** https://github.com/Ashish-cse38/Dynamic-React-Questionnaire-Component-Design-4586
-- **Issues:** https://github.com/Ashish-cse38/Dynamic-React-Questionnaire-Component-Design-4586/issues
+- **npm:** `https://www.npmjs.com/package/dynamic-react-questionnare-component`
+- **GitHub:** `https://github.com/Ashish-cse38/Dynamic-React-Questionnaire-Component-Design-4586`
+- **Issues:** `https://github.com/Ashish-cse38/Dynamic-React-Questionnaire-Component-Design-4586/issues`
 
 ---
 

@@ -73,10 +73,20 @@ export interface QuestionnaireConfig {
    */
   mainHeading?: string;
   /**
+   * Alias for {@link QuestionnaireConfig.mainHeading}.
+   * If both are provided, `topHeading` takes precedence.
+   */
+  topHeading?: string;
+  /**
    * Subtitle / description rendered below the main heading.
    * Falls back to `"Fill out the information below to proceed."` when omitted.
    */
   subHeading?: string;
+  /**
+   * Alias for {@link QuestionnaireConfig.subHeading}.
+   * If both are provided, `topSubHeading` takes precedence.
+   */
+  topSubHeading?: string;
   /**
    * Heading rendered above the fields of the currently active stage.
    * When provided, replaces the default stage-name label.
@@ -90,6 +100,66 @@ export interface QuestionnaireConfig {
    * @example "Please complete all fields for the {stage} section."
    */
   stageDescription?: string;
+
+  /**
+   * Select which progress bar UI to render in the questionnaire header.
+   * - `numberedprogressbar1`: numbered nodes with a fill track (default)
+   * - `namedprogressbar1`: stage names only with `>` separators
+   */
+  progressBarVariant?: 'numberedprogressbar1' | 'namedprogressbar1';
+
+  /**
+   * Optional color overrides for the UI.
+   * Accepts any valid CSS color value (hex, rgb, hsl, named colors, etc.).
+   */
+  colors?: {
+    /** Page/background behind the card. */
+    background?: string;
+    /** Card header background. */
+    cardHeader?: string;
+    /** Card main/content background. */
+    cardMain?: string;
+    /** Card footer background. */
+    cardFooter?: string;
+    /** Heading colors. */
+    headings?: {
+      topHeading?: string;
+      mainHeading?: string;
+      stageHeading?: string;
+    };
+    /** Sub-heading colors. */
+    subHeadings?: {
+      topSubHeading?: string;
+      subHeading?: string;
+      stageDescription?: string;
+    };
+    /** Other text colors. */
+    text?: {
+      default?: string;
+      muted?: string;
+    };
+  };
+
+  /**
+   * Optional layout sizing controls (percent-based).
+   * All values are percentages in the range 0–100.
+   */
+  area?: {
+    /** Card width as a percentage of the available container width. */
+    cardWidthPercent?: number;
+    /** Card height as a percentage of the viewport height. */
+    cardHeightPercent?: number;
+    /**
+     * Header height as a percentage of the card height.
+     * Used only when `cardHeightPercent` is provided.
+     */
+    headerPercent?: number;
+    /**
+     * Footer height as a percentage of the card height.
+     * Used only when `cardHeightPercent` is provided.
+     */
+    footerPercent?: number;
+  };
 }
 
 // ---------------------------------------------------------------------------

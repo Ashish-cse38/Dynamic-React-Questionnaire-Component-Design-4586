@@ -1,13 +1,45 @@
 export const formConfig = {
-  mainHeading: 'User Questionnaire',
-  subHeading: 'Help us get to know you better by completing all sections below.',
+  topHeading: 'User Questionnaire',
+  topSubHeading: 'Help us get to know you better by completing all sections below.',
+  progressBarVariant: 'numberedprogressbar1',
+  mainHeading: 'Questions',
+  subHeading: 'Fill these infos to proceed',
+  colors: {
+    background: '#F1F5F9',
+    cardHeader: 'linear-gradient(135deg, #EEF2FF 0%, #FFFFFF 100%)',
+    cardMain: '#FFFFFF',
+    cardFooter: '#F8FAFC',
+
+    headings: {
+      topHeading: '#0F172A',
+      mainHeading: '#111827',
+      stageHeading: '#4338CA',
+    },
+
+    subHeadings: {
+      topSubHeading: '#334155',
+      subHeading: '#475569',
+      stageDescription: '#64748B',
+    },
+
+    text: {
+      default: '#0F172A',
+      muted: '#64748B',
+    },
+  },
+  area: {
+    cardWidthPercent: 100,
+    cardHeightPercent: 86,
+    headerPercent: 24,
+    footerPercent: 10,
+  },
   stageHeading: 'Section: {stage}',
   stageDescription: 'Please complete all fields for the {stage} section.',
   stages: ['Personal Info', 'Preferences', 'Feedback'],
   fields: [
     {
       name: 'user_name',
-      label: 'What is your full name?',
+      label: 'What is your full name please?',
       type: 'text',
       required: true,
       stage: 'Personal Info',

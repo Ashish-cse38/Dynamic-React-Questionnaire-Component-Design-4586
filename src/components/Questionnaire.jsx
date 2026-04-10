@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ProgressBar from './ProgressBar';
+import NumberedProgressBar1 from './NumberedProgressBar1';
+import NamedProgressBar1 from './NamedProgressBar1';
 import FieldRenderer from './FieldRenderer';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
@@ -14,17 +15,77 @@ const Questionnaire = ({ config, onSubmit }) => {
   const {
     stages,
     fields,
-    mainHeading = 'Qestionnaire',
-    subHeading = 'Fill out the information below to proceed.',
+    topHeading,
+    topSubHeading,
+    mainHeading,
+    subHeading,
     stageHeading,
     stageDescription,
+    progressBarVariant = 'numberedprogressbar1',
+    colors,
+    area,
   } = config;
+
+  const color = {
+    background: colors?.background,
+    cardHeader: colors?.cardHeader,
+    cardMain: colors?.cardMain,
+    cardFooter: colors?.cardFooter,
+    headings: {
+      topHeading: colors?.headings?.topHeading,
+      mainHeading: colors?.headings?.mainHeading,
+      stageHeading: colors?.headings?.stageHeading,
+    },
+    subHeadings: {
+      topSubHeading: colors?.subHeadings?.topSubHeading,
+      subHeading: colors?.subHeadings?.subHeading,
+      stageDescription: colors?.subHeadings?.stageDescription,
+    },
+    text: {
+      default: colors?.text?.default,
+      muted: colors?.text?.muted,
+    },
+  };
 
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [direction, setDirection] = useState(1);
+
+  const clampPercent = (n) => {
+    if (typeof n !== 'number' || Number.isNaN(n)) return undefined;
+    return Math.min(100, Math.max(0, n));
+  };
+
+  const cardWidthPercent = clampPercent(area?.cardWidthPercent);
+  const cardHeightPercent = clampPercent(area?.cardHeightPercent);
+  const headerPercent = clampPercent(area?.headerPercent);
+  const footerPercent = clampPercent(area?.footerPercent);
+  const isConstrainedHeight = cardHeightPercent !== undefined;
+
+  const cardStyle = {
+    ...(cardWidthPercent !== undefined ? { width: `${cardWidthPercent}%` } : {}),
+    ...(cardHeightPercent !== undefined ? { height: `${cardHeightPercent}vh` } : {}),
+    backgroundColor: color.cardMain,
+  };
+
+  const useGridRows =
+    cardHeightPercent !== undefined &&
+    headerPercent !== undefined &&
+    footerPercent !== undefined;
+
+  const computedMainPercent =
+    headerPercent !== undefined && footerPercent !== undefined
+      ? Math.max(0, 100 - headerPercent - footerPercent)
+      : undefined;
+
+  const cardGridStyle = useGridRows
+    ? {
+        display: 'grid',
+        gridTemplateRows: `${headerPercent}% ${computedMainPercent}% ${footerPercent}%`,
+      }
+    : {};
 
   const currentStageName = stages[currentStageIndex];
   const currentFields = fields.filter((f) => f.stage === currentStageName);
@@ -94,124 +155,213 @@ const Questionnaire = ({ config, onSubmit }) => {
 
   if (isSubmitted) {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4 }}
-        className="max-w-2xl mx-auto bg-white rounded-3xl shadow-xl p-14 text-center"
-        role="status"
-        aria-live="polite"
+      <div
+        className={[
+          'w-full flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8',
+          isConstrainedHeight ? 'h-screen overflow-hidden py-4' : 'min-h-screen py-8',
+        ].join(' ')}
+        style={{ backgroundColor: color.background, color: color.text.default }}
       >
+        {(topHeading || topSubHeading) && (
+          <div className="w-full max-w-4xl mb-4">
+            {topHeading && (
+              <h1
+                className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight"
+                style={{ color: color.headings.topHeading }}
+              >
+                {topHeading}
+              </h1>
+            )}
+            {topSubHeading && (
+              <p
+                className="mt-2 text-gray-600 text-base sm:text-lg leading-relaxed"
+                style={{ color: color.subHeadings.topSubHeading ?? color.text.muted }}
+              >
+                {topSubHeading}
+              </p>
+            )}
+          </div>
+        )}
+
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
-          className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+          className="w-full max-w-2xl bg-white rounded-3xl shadow-xl p-14 text-center"
+          role="status"
+          aria-live="polite"
+          style={cardStyle}
         >
-          <SafeIcon icon={FiCheck} className="text-green-500 text-5xl" />
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
+            className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
+          >
+            <SafeIcon icon={FiCheck} className="text-green-500 text-5xl" />
+          </motion.div>
+          <h2 className="text-3xl font-bold text-gray-800 mb-3" style={{ color: color.headings.mainHeading }}>
+            All Done!
+          </h2>
+          <p className="text-gray-500 mb-8 leading-relaxed" style={{ color: color.text.muted }}>
+            Your responses have been recorded successfully.<br />
+            Thank you for taking the time to fill this out.
+          </p>
+          <button
+            onClick={handleReset}
+            className="inline-flex items-center gap-2 px-7 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md shadow-indigo-200"
+          >
+            <SafeIcon icon={FiRefreshCw} /> Start Over
+          </button>
         </motion.div>
-        <h2 className="text-3xl font-bold text-gray-800 mb-3">All Done!</h2>
-        <p className="text-gray-500 mb-8 leading-relaxed">
-          Your responses have been recorded successfully.<br />
-          Thank you for taking the time to fill this out.
-        </p>
-        <button
-          onClick={handleReset}
-          className="inline-flex items-center gap-2 px-7 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md shadow-indigo-200"
-        >
-          <SafeIcon icon={FiRefreshCw} /> Start Over
-        </button>
-      </motion.div>
+      </div>
     );
   }
 
   return (
     <div
-      className="max-w-3xl mx-auto w-full bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col"
-      role="main"
-      aria-label="Multi-step questionnaire"
+      className={[
+        'w-full flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8',
+        isConstrainedHeight ? 'h-screen overflow-hidden py-4' : 'min-h-screen py-8',
+      ].join(' ')}
+      style={{ backgroundColor: color.background, color: color.text.default }}
     >
-      {/* Header */}
-      <div className="px-8 pt-8 pb-4 bg-gradient-to-br from-indigo-50 to-white border-b border-gray-100">
-        <div className="flex items-center justify-between mb-1">
-          <h1 className="text-2xl font-bold text-gray-800">{mainHeading}</h1>
-          <span
-            className="text-xs font-semibold text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100"
-            aria-live="polite"
-          >
-            Step {currentStageIndex + 1} of {stages.length}
-          </span>
-        </div>
-        <p className="text-sm text-gray-400 mb-6">{subHeading}</p>
-        <ProgressBar stages={stages} currentStageIndex={currentStageIndex} />
-      </div>
-
-      {/* Fields */}
-      <div className="flex-1 px-8 py-8 overflow-hidden min-h-[380px]">
-        <AnimatePresence mode="wait" custom={direction}>
-          <motion.div
-            key={currentStageIndex}
-            custom={direction}
-            initial={{ opacity: 0, x: direction * 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: direction * -30 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-          >
-            <h2 className="text-base font-bold text-indigo-700 uppercase tracking-widest mb-1 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center font-bold">
-                {currentStageIndex + 1}
-              </span>
-              {resolvedStageHeading}
-            </h2>
-
-            {resolvedStageDescription && (
-              <p className="text-sm text-gray-400 mb-6 ml-8">
-                {resolvedStageDescription}
-              </p>
-            )}
-
-            {!resolvedStageDescription && <div className="mb-6" />}
-
-            {currentFields.map((field) => (
-              <FieldRenderer
-                key={field.name}
-                field={field}
-                value={formData[field.name] ?? ''}
-                onChange={handleChange}
-                error={errors[field.name]}
-              />
-            ))}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {/* Footer nav */}
-      <div className="px-8 py-5 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-        <button
-          onClick={handlePrev}
-          disabled={currentStageIndex === 0}
-          aria-label="Go to previous step"
-          className={[
-            'flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200',
-            currentStageIndex === 0
-              ? 'opacity-0 pointer-events-none'
-              : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 hover:border-gray-300',
-          ].join(' ')}
-        >
-          <SafeIcon icon={FiArrowLeft} /> Previous
-        </button>
-
-        <button
-          onClick={handleNext}
-          aria-label={isLastStage ? 'Submit form' : 'Go to next step'}
-          className="flex items-center gap-2 px-7 py-2.5 rounded-xl font-semibold text-sm bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md shadow-indigo-200"
-        >
-          {isLastStage ? (
-            <><SafeIcon icon={FiCheck} /> Submit</>
-          ) : (
-            <> Next Step <SafeIcon icon={FiArrowRight} /></>
+      {(topHeading || topSubHeading) && (
+        <div className="w-full max-w-4xl mb-4">
+          {topHeading && (
+            <h1
+              className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight"
+              style={{ color: color.headings.topHeading }}
+            >
+              {topHeading}
+            </h1>
           )}
-        </button>
+          {topSubHeading && (
+            <p
+              className="mt-2 text-gray-600 text-base sm:text-lg leading-relaxed"
+              style={{ color: color.subHeadings.topSubHeading ?? color.text.muted }}
+            >
+              {topSubHeading}
+            </p>
+          )}
+        </div>
+      )}
+
+      <div className="w-full max-w-4xl">
+        <div
+          className="w-full bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col"
+          role="main"
+          aria-label="Multi-step questionnaire"
+          style={{ ...cardStyle, ...cardGridStyle }}
+        >
+          {/* Header */}
+          <div
+            className="px-8 pt-4 bg-gradient-to-br from-indigo-50 to-white border-b border-gray-100"
+            style={{ background: color.cardHeader, backgroundColor: color.cardHeader }}
+          >
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-2xl font-bold text-gray-800" style={{ color: color.headings.mainHeading }}>
+              {mainHeading}
+            </h2>
+            <span
+              className="text-xs font-semibold text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100"
+              aria-live="polite"
+            >
+              Step {currentStageIndex + 1} of {stages.length}
+            </span>
+          </div>
+          <p className="text-sm text-gray-400 mb-6" style={{ color: color.subHeadings.subHeading ?? color.text.muted }}>
+            {subHeading}
+          </p>
+          {progressBarVariant === 'namedprogressbar1'
+            ? <NamedProgressBar1 stages={stages} currentStageIndex={currentStageIndex} />
+            : <NumberedProgressBar1 stages={stages} currentStageIndex={currentStageIndex} />
+          }
+          </div>
+
+          {/* Fields */}
+          <div
+          className={[
+            'flex-1 px-8 py-4 min-h-[380px]',
+            isConstrainedHeight ? 'overflow-y-auto' : 'overflow-visible',
+          ].join(' ')}
+            style={{ backgroundColor: color.cardMain }}
+          >
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={currentStageIndex}
+              custom={direction}
+              initial={{ opacity: 0, x: direction * 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: direction * -30 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              <h3
+                className="text-base font-bold text-indigo-700 uppercase tracking-widest mb-1 flex items-center gap-2"
+                style={{ color: color.headings.stageHeading }}
+              >
+                <span className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center font-bold">
+                  {currentStageIndex + 1}
+                </span>
+                {resolvedStageHeading}
+              </h3>
+
+              {resolvedStageDescription && (
+                <p
+                  className="text-sm text-gray-400 mb-6 ml-8"
+                  style={{ color: color.subHeadings.stageDescription ?? color.text.muted }}
+                >
+                  {resolvedStageDescription}
+                </p>
+              )}
+
+              {!resolvedStageDescription && <div className="mb-6" />}
+
+              {currentFields.map((field) => (
+                <FieldRenderer
+                  key={field.name}
+                  field={field}
+                  value={formData[field.name] ?? ''}
+                  onChange={handleChange}
+                  error={errors[field.name]}
+                />
+              ))}
+            </motion.div>
+          </AnimatePresence>
+          </div>
+
+          {/* Footer nav */}
+          <div
+            className="px-8 pb-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between"
+            style={{ backgroundColor: color.cardFooter }}
+          >
+          <button
+            onClick={handlePrev}
+            disabled={currentStageIndex === 0}
+            aria-label="Go to previous step"
+            className={[
+              'flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200',
+              currentStageIndex === 0
+                ? 'opacity-0 pointer-events-none'
+                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 hover:border-gray-300',
+            ].join(' ')}
+          >
+            <SafeIcon icon={FiArrowLeft} /> Previous
+          </button>
+
+          <button
+            onClick={handleNext}
+            aria-label={isLastStage ? 'Submit form' : 'Go to next step'}
+            className="flex items-center gap-2 px-7 py-2.5 rounded-xl font-semibold text-sm bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md shadow-indigo-200"
+          >
+            {isLastStage ? (
+              <><SafeIcon icon={FiCheck} /> Submit</>
+            ) : (
+              <> Next Step <SafeIcon icon={FiArrowRight} /></>
+            )}
+          </button>
+          </div>
+        </div>
       </div>
     </div>
   );
