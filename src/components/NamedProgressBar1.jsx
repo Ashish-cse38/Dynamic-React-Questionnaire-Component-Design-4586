@@ -6,7 +6,32 @@ import { motion } from 'framer-motion';
  *
  * @param {import('../types').ProgressBarProps} props
  */
-const NamedProgressBar1 = ({ stages, currentStageIndex }) => {
+const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+
+const hexToRgb = (hex) => {
+  if (typeof hex !== 'string') return null;
+  const cleaned = hex.trim().replace('#', '');
+  if (![3, 6].includes(cleaned.length)) return null;
+  const full =
+    cleaned.length === 3
+      ? cleaned
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : cleaned;
+  const num = Number.parseInt(full, 16);
+  if (Number.isNaN(num)) return null;
+  return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+};
+
+const withAlpha = (color, alpha) => {
+  const a = clamp(alpha, 0, 1);
+  const rgb = hexToRgb(color);
+  if (rgb) return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${a})`;
+  return `color-mix(in srgb, ${color} ${Math.round(a * 100)}%, transparent)`;
+};
+
+const NamedProgressBar1 = ({ stages, currentStageIndex, themeColor = '#4338CA' }) => {
   return (
     <nav aria-label="Form progress" className="w-full">
       <ol className="flex flex-wrap items-center gap-x-2 gap-y-2 text-sm">
@@ -14,10 +39,14 @@ const NamedProgressBar1 = ({ stages, currentStageIndex }) => {
           const isCompleted = index < currentStageIndex;
           const isCurrent = index === currentStageIndex;
           const textClass = isCurrent
-            ? 'text-indigo-700 font-semibold'
+            ? 'font-semibold'
             : isCompleted
               ? 'text-gray-700'
-              : 'text-gray-400';
+              : 'text-gray-900';
+
+          const currentStyle = isCurrent
+            ? { color: themeColor, borderColor: withAlpha(themeColor, 0.18), backgroundColor: withAlpha(themeColor, 0.08) }
+            : undefined;
 
           return (
             <li key={stage} className="flex items-center">
@@ -25,12 +54,13 @@ const NamedProgressBar1 = ({ stages, currentStageIndex }) => {
                 className={[
                   'inline-flex items-center rounded-full px-3 py-1.5 border transition-colors',
                   isCurrent
-                    ? 'border-indigo-200 bg-indigo-50'
+                    ? ''
                     : isCompleted
                       ? 'border-gray-200 bg-white'
                       : 'border-transparent bg-transparent',
                   textClass,
                 ].join(' ')}
+                style={currentStyle}
                 aria-current={isCurrent ? 'step' : undefined}
                 initial={false}
                 animate={{ scale: isCurrent ? 1.02 : 1 }}

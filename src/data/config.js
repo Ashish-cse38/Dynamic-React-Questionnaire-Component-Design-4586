@@ -1,9 +1,10 @@
 export const formConfig = {
   topHeading: 'User Questionnaire',
   topSubHeading: 'Help us get to know you better by completing all sections below.',
-  progressBarVariant: 'numberedprogressbar1',
+  progressBarVariant: 'namedprogressbar1',
   mainHeading: 'Questions',
   subHeading: 'Fill these infos to proceed',
+  themeColor: 'red',
   colors: {
     background: '#F1F5F9',
     cardHeader: 'linear-gradient(135deg, #EEF2FF 0%, #FFFFFF 100%)',
@@ -33,6 +34,11 @@ export const formConfig = {
     headerPercent: 24,
     footerPercent: 10,
   },
+  EffectOnSubmit: 'firework',
+  endHeader: 'Thanks!',
+  endSubHeader: 'Your responses his duly recorded successfully.\nThank you for your time.',
+  enableStartOver: false,
+  previewMode: true,
   stageHeading: 'Section: {stage}',
   stageDescription: 'Please complete all fields for the {stage} section.',
   stages: ['Personal Info', 'Preferences', 'Feedback'],

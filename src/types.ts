@@ -112,6 +112,11 @@ export interface QuestionnaireConfig {
    * Optional color overrides for the UI.
    * Accepts any valid CSS color value (hex, rgb, hsl, named colors, etc.).
    */
+  /**
+   * Primary accent color used for the "themed" parts of the UI (buttons, stage labels, progress accents).
+   * Accepts any valid CSS color value (hex, rgb, hsl, named colors, etc.).
+   */
+  themeColor?: string;
   colors?: {
     /** Page/background behind the card. */
     background?: string;
@@ -160,6 +165,37 @@ export interface QuestionnaireConfig {
      */
     footerPercent?: number;
   };
+
+  /**
+   * Optional UI effects to run after successful submit.
+   * @example "confetti"
+   */
+  EffectOnSubmit?: 'confetti' | 'bigCheck' | 'firework';
+
+  /**
+   * Success screen header text shown after submission.
+   * @default "All Done!"
+   */
+  endHeader?: string;
+
+  /**
+   * Success screen subheader/description shown after submission.
+   * @default "Your responses have been recorded successfully. Thank you for taking the time to fill this out."
+   */
+  endSubHeader?: string;
+
+  /**
+   * Controls whether the success screen shows the "Start Over" button.
+   * @default true
+   */
+  enableStartOver?: boolean;
+
+  /**
+   * When enabled, shows a preview page (grouped by stage) before the final submit.
+   * The preview is rendered inside the same card and is scrollable.
+   * @default false
+   */
+  previewMode?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -211,6 +247,8 @@ export interface ProgressBarProps {
   stages: string[];
   /** Zero-based index of the currently active stage. */
   currentStageIndex: number;
+  /** Accent color for active/completed states. */
+  themeColor?: string;
 }
 
 // ---------------------------------------------------------------------------

@@ -24,6 +24,42 @@ Supported peer versions: `react >=18.0.0 < 20`, `react-dom >=18.0.0 < 20`
 
 ---
 
+## Tailwind setup (required)
+
+This package uses Tailwind utility classes internally. Your Tailwind `content` must include this package so the classes are not purged.
+
+### `tailwind.config.js` (Tailwind v3+)
+
+Add the package path to `content`:
+
+```js
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
+    './node_modules/dynamic-react-questionnare-component/**/*.{js,ts,jsx,tsx}',
+  ],
+  theme: { extend: {} },
+  plugins: [],
+};
+```
+
+### pnpm users
+
+If you use pnpm, dependencies may live under `node_modules/.pnpm`. Add this too:
+
+```js
+content: [
+  './index.html',
+  './src/**/*.{js,ts,jsx,tsx}',
+  './node_modules/dynamic-react-questionnare-component/**/*.{js,ts,jsx,tsx}',
+  './node_modules/.pnpm/**/node_modules/dynamic-react-questionnare-component/**/*.{js,ts,jsx,tsx}',
+],
+```
+
+---
+
 ## Quick Start
 
 ```jsx
@@ -154,6 +190,9 @@ interface QuestionnaireConfig {
   // Progress bar UI
   progressBarVariant?: 'numberedprogressbar1' | 'namedprogressbar1';
 
+  // Primary accent color used for themed UI (buttons, progress accents, stage heading)
+  themeColor?: string;
+
   // Optional colors (CSS color strings)
   colors?: {
     background?: string;   // Outermost page background
@@ -183,6 +222,17 @@ interface QuestionnaireConfig {
     headerPercent?: number;      // 0–100 (% of card height)
     footerPercent?: number;      // 0–100 (% of card height)
   };
+
+  // Optional UI effects to run after successful submit
+  EffectOnSubmit?: 'confetti' | 'bigCheck' | 'firework';
+
+  // Success screen (after submit)
+  endHeader?: string;
+  endSubHeader?: string;
+  enableStartOver?: boolean;
+
+  // Show a scrollable preview page before final submit
+  previewMode?: boolean;
 }
 ```
 
@@ -346,12 +396,15 @@ All values are regular CSS colors (hex/rgb/hsl/named colors). Example:
 ```js
 const config = {
   // ...
+  themeColor: '#16A34A', // green
   colors: {
     background: '#F1F5F9',
-    cardHeader: 'linear-gradient(135deg, #EEF2FF 0%, #FFFFFF 100%)',
+    // Optional: override header background.
+    // If omitted, the header gets an automatic themeColor → white gradient.
+    cardHeader: 'linear-gradient(135deg, rgba(22,163,74,0.12) 0%, #FFFFFF 100%)',
     cardMain: '#FFFFFF',
     cardFooter: '#F8FAFC',
-    headings: { stageHeading: '#4338CA' },
+    headings: { stageHeading: '#16A34A' },
     text: { default: '#0F172A', muted: '#64748B' },
   },
 };
@@ -375,7 +428,51 @@ const config = {
 
 If `cardHeightPercent` is set, the **main area becomes scrollable** automatically when content overflows (so the page itself doesn’t scroll).
 
+### Special effects (after submit)
+
+Available options:
+
+- `confetti`: falling confetti
+- `bigCheck`: large 3D check that drops into the center with a bounce
+- `firework`: 3–5 colorful firework bursts
+
+Example:
+
+```js
+const config = {
+  // ...
+  EffectOnSubmit: 'firework',
+};
+```
+
+### Success screen (after submit)
+
+Configure the final screen text and whether the reset button shows:
+
+```js
+const config = {
+  // ...
+  endHeader: 'Thanks!',
+  endSubHeader: 'We received your response.\nWe appreciate your time.',
+  enableStartOver: false,
+};
+```
+
 ---
+
+### Preview mode (before submit)
+
+When enabled, the last step becomes:
+
+- **Preview** (shows a scrollable summary of all questions + answers grouped by stage)
+- **Confirm & Submit**
+
+```js
+const config = {
+  // ...
+  previewMode: true,
+};
+```
 
 ### `<FieldRenderer />`
 

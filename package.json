@@ -1,7 +1,7 @@
 {
   "name": "dynamic-react-questionnare-component",
   "private": false,
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "A dynamic,JSON-driven multi-step questionnaire component for React with built-in validation,smooth animations,and a progress indicator.",
   "license": "MIT",
   "author": "questionnaire-react contributors",
@@ -28,8 +28,8 @@
     "url": "https://github.com/Ashish-cse38/Dynamic-React-Questionnaire-Component-Design-4586/issues"
   },
   "type": "module",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist",
@@ -38,9 +38,9 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
   "scripts": {

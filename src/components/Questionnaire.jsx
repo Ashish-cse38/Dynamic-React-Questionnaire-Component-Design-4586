@@ -5,11 +5,41 @@ import NamedProgressBar1 from './NamedProgressBar1';
 import FieldRenderer from './FieldRenderer';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
+import { BigCheckOverlay, ConfettiOverlay, FireworkOverlay } from '../effects';
 
 const { FiArrowRight, FiArrowLeft, FiCheck, FiRefreshCw } = FiIcons;
 
 const resolveToken = (template, stageName) =>
   template?.replace('{stage}', stageName) ?? stageName;
+
+const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+
+const hexToRgb = (hex) => {
+  if (typeof hex !== 'string') return null;
+  const cleaned = hex.trim().replace('#', '');
+  if (![3, 6].includes(cleaned.length)) return null;
+  const full =
+    cleaned.length === 3
+      ? cleaned
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : cleaned;
+  const num = Number.parseInt(full, 16);
+  if (Number.isNaN(num)) return null;
+  return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+};
+
+const withAlpha = (color, alpha) => {
+  const a = clamp(alpha, 0, 1);
+  const rgb = hexToRgb(color);
+  if (rgb) return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${a})`;
+  // Fallback for non-hex CSS colors (e.g. "green", "rgb(...)")
+  return `color-mix(in srgb, ${color} ${Math.round(a * 100)}%, transparent)`;
+};
+
+const headerGradient = (themeColor) =>
+  `linear-gradient(135deg, ${withAlpha(themeColor, 0.12)} 0%, #FFFFFF 100%)`;
 
 const Questionnaire = ({ config, onSubmit }) => {
   const {
@@ -24,17 +54,26 @@ const Questionnaire = ({ config, onSubmit }) => {
     progressBarVariant = 'numberedprogressbar1',
     colors,
     area,
+    EffectOnSubmit,
+    themeColor: themeColorProp,
+    endHeader = 'All Done!',
+    endSubHeader = 'Your responses have been recorded successfully.\nThank you for taking the time to fill this out.',
+    enableStartOver = true,
+    previewMode = false,
   } = config;
+
+  const resolvedThemeColor =
+    themeColorProp ?? colors?.headings?.stageHeading ?? '#4338CA';
 
   const color = {
     background: colors?.background,
-    cardHeader: colors?.cardHeader,
+    cardHeader: colors?.cardHeader ?? headerGradient(resolvedThemeColor),
     cardMain: colors?.cardMain,
     cardFooter: colors?.cardFooter,
     headings: {
       topHeading: colors?.headings?.topHeading,
       mainHeading: colors?.headings?.mainHeading,
-      stageHeading: colors?.headings?.stageHeading,
+      stageHeading: resolvedThemeColor,
     },
     subHeadings: {
       topSubHeading: colors?.subHeadings?.topSubHeading,
@@ -47,11 +86,26 @@ const Questionnaire = ({ config, onSubmit }) => {
     },
   };
 
+  const accentBadgeStyle = {
+    color: resolvedThemeColor,
+    backgroundColor: withAlpha(resolvedThemeColor, 0.08),
+    borderColor: withAlpha(resolvedThemeColor, 0.16),
+  };
+
+  const primaryButtonStyle = {
+    backgroundColor: resolvedThemeColor,
+    boxShadow: `0 12px 24px ${hexToRgb(resolvedThemeColor) ? withAlpha(resolvedThemeColor, 0.18) : 'rgba(15, 23, 42, 0.14)'}`,
+  };
+
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [direction, setDirection] = useState(1);
+  const [confettiActive, setConfettiActive] = useState(false);
+  const [bigCheckActive, setBigCheckActive] = useState(false);
+  const [fireworkActive, setFireworkActive] = useState(false);
+  const [isPreviewing, setIsPreviewing] = useState(false);
 
   const clampPercent = (n) => {
     if (typeof n !== 'number' || Number.isNaN(n)) return undefined;
@@ -90,6 +144,7 @@ const Questionnaire = ({ config, onSubmit }) => {
   const currentStageName = stages[currentStageIndex];
   const currentFields = fields.filter((f) => f.stage === currentStageName);
   const isLastStage = currentStageIndex === stages.length - 1;
+  const isOnPreviewStep = Boolean(previewMode && isPreviewing);
 
   const resolvedStageHeading = stageHeading
     ? resolveToken(stageHeading, currentStageName)
@@ -98,6 +153,13 @@ const Questionnaire = ({ config, onSubmit }) => {
   const resolvedStageDescription = stageDescription
     ? resolveToken(stageDescription, currentStageName)
     : null;
+
+  const formatAnswer = (value) => {
+    if (value === undefined || value === null) return '—';
+    if (Array.isArray(value)) return value.length ? value.join(', ') : '—';
+    if (typeof value === 'string') return value.trim() ? value : '—';
+    return String(value);
+  };
 
   const handleChange = (name, value) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -130,8 +192,23 @@ const Questionnaire = ({ config, onSubmit }) => {
   const handleNext = () => {
     if (!validateStage()) return;
     if (isLastStage) {
+      if (previewMode && !isPreviewing) {
+        setDirection(1);
+        setIsPreviewing(true);
+        return;
+      }
       if (onSubmit) onSubmit(formData);
       else console.log('Submitted:', formData);
+      if (EffectOnSubmit === 'confetti') {
+        setConfettiActive(true);
+        window.setTimeout(() => setConfettiActive(false), 2200);
+      } else if (EffectOnSubmit === 'bigCheck') {
+        setBigCheckActive(true);
+        window.setTimeout(() => setBigCheckActive(false), 1600);
+      } else if (EffectOnSubmit === 'firework') {
+        setFireworkActive(true);
+        window.setTimeout(() => setFireworkActive(false), 2600);
+      }
       setIsSubmitted(true);
     } else {
       setDirection(1);
@@ -140,6 +217,11 @@ const Questionnaire = ({ config, onSubmit }) => {
   };
 
   const handlePrev = () => {
+    if (previewMode && isPreviewing) {
+      setDirection(-1);
+      setIsPreviewing(false);
+      return;
+    }
     if (currentStageIndex > 0) {
       setDirection(-1);
       setCurrentStageIndex((prev) => prev - 1);
@@ -151,6 +233,10 @@ const Questionnaire = ({ config, onSubmit }) => {
     setFormData({});
     setErrors({});
     setCurrentStageIndex(0);
+    setIsPreviewing(false);
+    setConfettiActive(false);
+    setBigCheckActive(false);
+    setFireworkActive(false);
   };
 
   if (isSubmitted) {
@@ -162,6 +248,9 @@ const Questionnaire = ({ config, onSubmit }) => {
         ].join(' ')}
         style={{ backgroundColor: color.background, color: color.text.default }}
       >
+        <ConfettiOverlay active={confettiActive} />
+        <BigCheckOverlay active={bigCheckActive} />
+        <FireworkOverlay active={fireworkActive} />
         {(topHeading || topSubHeading) && (
           <div className="w-full max-w-4xl mb-4">
             {topHeading && (
@@ -201,18 +290,20 @@ const Questionnaire = ({ config, onSubmit }) => {
             <SafeIcon icon={FiCheck} className="text-green-500 text-5xl" />
           </motion.div>
           <h2 className="text-3xl font-bold text-gray-800 mb-3" style={{ color: color.headings.mainHeading }}>
-            All Done!
+            {endHeader}
           </h2>
-          <p className="text-gray-500 mb-8 leading-relaxed" style={{ color: color.text.muted }}>
-            Your responses have been recorded successfully.<br />
-            Thank you for taking the time to fill this out.
+          <p className="text-gray-500 mb-8 leading-relaxed whitespace-pre-line" style={{ color: color.text.muted }}>
+            {endSubHeader}
           </p>
-          <button
-            onClick={handleReset}
-            className="inline-flex items-center gap-2 px-7 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md shadow-indigo-200"
-          >
-            <SafeIcon icon={FiRefreshCw} /> Start Over
-          </button>
+          {enableStartOver && (
+            <button
+              onClick={handleReset}
+              className="inline-flex items-center gap-2 px-7 py-3 text-white font-semibold rounded-xl hover:brightness-95 active:scale-95 transition-all duration-200 shadow-md"
+              style={primaryButtonStyle}
+            >
+              <SafeIcon icon={FiRefreshCw} /> Start Over
+            </button>
+          )}
         </motion.div>
       </div>
     );
@@ -226,6 +317,9 @@ const Questionnaire = ({ config, onSubmit }) => {
       ].join(' ')}
       style={{ backgroundColor: color.background, color: color.text.default }}
     >
+      <ConfettiOverlay active={confettiActive} />
+      <BigCheckOverlay active={bigCheckActive} />
+      <FireworkOverlay active={fireworkActive} />
       {(topHeading || topSubHeading) && (
         <div className="w-full max-w-4xl mb-4">
           {topHeading && (
@@ -256,26 +350,27 @@ const Questionnaire = ({ config, onSubmit }) => {
         >
           {/* Header */}
           <div
-            className="px-8 pt-4 bg-gradient-to-br from-indigo-50 to-white border-b border-gray-100"
-            style={{ background: color.cardHeader, backgroundColor: color.cardHeader }}
+            className="px-8 pt-4 border-b border-gray-100"
+            style={{ background: color.cardHeader }}
           >
           <div className="flex items-center justify-between mb-1">
             <h2 className="text-2xl font-bold text-gray-800" style={{ color: color.headings.mainHeading }}>
               {mainHeading}
             </h2>
             <span
-              className="text-xs font-semibold text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100"
+              className="text-xs font-semibold px-3 py-1 rounded-full border"
               aria-live="polite"
+              style={accentBadgeStyle}
             >
-              Step {currentStageIndex + 1} of {stages.length}
+              {isOnPreviewStep ? 'Preview' : `Step ${currentStageIndex + 1} of ${stages.length}`}
             </span>
           </div>
           <p className="text-sm text-gray-400 mb-6" style={{ color: color.subHeadings.subHeading ?? color.text.muted }}>
             {subHeading}
           </p>
           {progressBarVariant === 'namedprogressbar1'
-            ? <NamedProgressBar1 stages={stages} currentStageIndex={currentStageIndex} />
-            : <NumberedProgressBar1 stages={stages} currentStageIndex={currentStageIndex} />
+            ? <NamedProgressBar1 stages={stages} currentStageIndex={currentStageIndex} themeColor={resolvedThemeColor} />
+            : <NumberedProgressBar1 stages={stages} currentStageIndex={currentStageIndex} themeColor={resolvedThemeColor} />
           }
           </div>
 
@@ -289,43 +384,90 @@ const Questionnaire = ({ config, onSubmit }) => {
           >
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
-              key={currentStageIndex}
+              key={isOnPreviewStep ? 'preview' : currentStageIndex}
               custom={direction}
               initial={{ opacity: 0, x: direction * 30 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: direction * -30 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
-              <h3
-                className="text-base font-bold text-indigo-700 uppercase tracking-widest mb-1 flex items-center gap-2"
-                style={{ color: color.headings.stageHeading }}
-              >
-                <span className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center font-bold">
-                  {currentStageIndex + 1}
-                </span>
-                {resolvedStageHeading}
-              </h3>
+              {isOnPreviewStep ? (
+                <div>
+                  <h3
+                    className="text-base font-bold uppercase tracking-widest mb-4"
+                    style={{ color: color.headings.stageHeading }}
+                  >
+                    Preview your answers
+                  </h3>
 
-              {resolvedStageDescription && (
-                <p
-                  className="text-sm text-gray-400 mb-6 ml-8"
-                  style={{ color: color.subHeadings.stageDescription ?? color.text.muted }}
-                >
-                  {resolvedStageDescription}
-                </p>
+                  <div className="space-y-8">
+                    {stages.map((stage) => {
+                      const stageFields = fields.filter((f) => f.stage === stage);
+                      if (!stageFields.length) return null;
+
+                      return (
+                        <section key={stage} className="rounded-2xl border border-gray-100 bg-white/60">
+                          <div className="px-5 py-4 border-b border-gray-100">
+                            <h4 className="text-sm font-bold tracking-wide" style={{ color: color.headings.mainHeading }}>
+                              {stage}
+                            </h4>
+                          </div>
+                          <div className="px-5 py-4">
+                            <dl className="space-y-4">
+                              {stageFields.map((f) => (
+                                <div key={f.name} className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-4">
+                                  <dt className="text-sm font-semibold" style={{ color: color.text.default }}>
+                                    {f.label}
+                                  </dt>
+                                  <dd className="text-sm sm:col-span-2" style={{ color: color.text.muted }}>
+                                    {formatAnswer(formData[f.name])}
+                                  </dd>
+                                </div>
+                              ))}
+                            </dl>
+                          </div>
+                        </section>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <h3
+                    className="text-base font-bold uppercase tracking-widest mb-1 flex items-center gap-2"
+                    style={{ color: color.headings.stageHeading }}
+                  >
+                    <span
+                      className="w-6 h-6 rounded-full text-white text-xs flex items-center justify-center font-bold"
+                      style={{ backgroundColor: resolvedThemeColor }}
+                    >
+                      {currentStageIndex + 1}
+                    </span>
+                    {resolvedStageHeading}
+                  </h3>
+
+                  {resolvedStageDescription && (
+                    <p
+                      className="text-sm text-gray-400 mb-6 ml-8"
+                      style={{ color: color.subHeadings.stageDescription ?? color.text.muted }}
+                    >
+                      {resolvedStageDescription}
+                    </p>
+                  )}
+
+                  {!resolvedStageDescription && <div className="mb-6" />}
+
+                  {currentFields.map((field) => (
+                    <FieldRenderer
+                      key={field.name}
+                      field={field}
+                      value={formData[field.name] ?? ''}
+                      onChange={handleChange}
+                      error={errors[field.name]}
+                    />
+                  ))}
+                </div>
               )}
-
-              {!resolvedStageDescription && <div className="mb-6" />}
-
-              {currentFields.map((field) => (
-                <FieldRenderer
-                  key={field.name}
-                  field={field}
-                  value={formData[field.name] ?? ''}
-                  onChange={handleChange}
-                  error={errors[field.name]}
-                />
-              ))}
             </motion.div>
           </AnimatePresence>
           </div>
@@ -337,25 +479,26 @@ const Questionnaire = ({ config, onSubmit }) => {
           >
           <button
             onClick={handlePrev}
-            disabled={currentStageIndex === 0}
-            aria-label="Go to previous step"
+            disabled={currentStageIndex === 0 && !isOnPreviewStep}
+            aria-label={isOnPreviewStep ? 'Back to edit' : 'Go to previous step'}
             className={[
               'flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200',
-              currentStageIndex === 0
+              (currentStageIndex === 0 && !isOnPreviewStep)
                 ? 'opacity-0 pointer-events-none'
                 : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 hover:border-gray-300',
             ].join(' ')}
           >
-            <SafeIcon icon={FiArrowLeft} /> Previous
+            <SafeIcon icon={FiArrowLeft} /> {isOnPreviewStep ? 'Back to Edit' : 'Previous'}
           </button>
 
           <button
             onClick={handleNext}
-            aria-label={isLastStage ? 'Submit form' : 'Go to next step'}
-            className="flex items-center gap-2 px-7 py-2.5 rounded-xl font-semibold text-sm bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-md shadow-indigo-200"
+            aria-label={isLastStage ? (isOnPreviewStep ? 'Confirm submit' : 'Submit form') : 'Go to next step'}
+            className="flex items-center gap-2 px-7 py-2.5 rounded-xl font-semibold text-sm text-white hover:brightness-95 active:scale-95 transition-all duration-200 shadow-md"
+            style={primaryButtonStyle}
           >
             {isLastStage ? (
-              <><SafeIcon icon={FiCheck} /> Submit</>
+              <><SafeIcon icon={FiCheck} /> {isOnPreviewStep ? 'Confirm & Submit' : 'Preview'}</>
             ) : (
               <> Next Step <SafeIcon icon={FiArrowRight} /></>
             )}
